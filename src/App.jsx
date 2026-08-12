@@ -385,11 +385,9 @@ export default function App() {
             <span style={{fontSize:22}}>→</span>
           </button>
         </div>
-        <div style={{textAlign:"center"}}>
-          <button onClick={()=>setScreen("results")} style={{background:"none",border:"none",color:"#9CA3AF",fontSize:13,cursor:"pointer",textDecoration:"underline"}}>Aktuelle Ergebnisse ansehen</button>
-        </div>
+
         <p style={{textAlign:"center",color:"#D1D5DB",fontSize:11,marginTop:16}}>Anonym · ca. 5 Minuten · 17 Fragen · 5 Phasen</p>
-        <div style={{textAlign:"center",marginTop:8}}><button onClick={()=>setScreen("intro")} style={{background:"none",border:"none",color:"#D1D5DB",fontSize:12,cursor:"pointer"}}>ℹ️ Über diese Umfrage</button></div>
+
       </div>
     </div>
   );
@@ -579,10 +577,7 @@ export default function App() {
             :"Ihr habt eine neue Mitarbeiterin gewonnen! Eure Antworten helfen dabei, die Recruiting-Lücke aus Unternehmenssicht zu verstehen."}
         </p>
         <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          <button onClick={()=>setScreen("results")} style={{padding:"15px",borderRadius:14,border:"none",background:P,color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer"}}>
-            Ergebnisse ansehen
-          </button>
-          <button onClick={()=>setScreen("start")} style={{padding:"15px",borderRadius:14,border:"2px solid #E5E7EB",background:"#fff",color:"#374151",fontSize:14,fontWeight:600,cursor:"pointer"}}>
+          <button onClick={()=>setScreen("start")} style={{padding:"15px",borderRadius:14,border:"none",background:P,color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer"}}>
             Zur Startseite
           </button>
         </div>
