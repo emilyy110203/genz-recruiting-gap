@@ -3,24 +3,22 @@ import { useState } from "react";
 const SUPABASE_URL = "https://xilhocbidbspezlndvqq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_s9zD1-ovvbdYtk7z5Pzrkw_QbMvV4RI";
 
+import { createClient } from "@supabase/supabase-js";
+const supabase = createClient(
+  "https://xilhocbidbspezlndvqq.supabase.co",
+  "sb_publishable_s9zD1-ovvbdYtk7z5Pzrkw_QbMvV4RI"
+);
 async function saveToSupabase(role, answers) {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/responses`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
-        "Prefer": "return=minimal"
-      },
-      body: JSON.stringify({ role, answers })
-    });
-    return res.ok;
+    const { error } = await supabase.from("responses").insert({ role, answers });
+    if (error) console.error("Supabase error:", error);
+    return !error;
   } catch (e) {
     console.error("Supabase save failed:", e);
     return false;
   }
 }
+
 
 
 
