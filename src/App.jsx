@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+
+const [saveStatus, setSaveStatus] = useState(null); // null | {ok, error}
 const SUPABASE_URL = "https://xilhocbidbspezlndvqq.supabase.co";
 const SUPABASE_KEY = "sb_publishable_s9zD1-ovvbdYtk7z5Pzrkw_QbMvV4RI";
 
@@ -12,14 +14,12 @@ async function saveToSupabase(role, answers) {
   try {
     const { error } = await supabase.from("responses").insert({ role, answers });
     if (error) console.error("Supabase error:", error);
-    return !error;
+    return { ok: !error, error };
   } catch (e) {
     console.error("Supabase save failed:", e);
-    return false;
+    return { ok: false, error: e };
   }
 }
-
-
 
 
 const P = "#7C3AED";
@@ -307,14 +307,14 @@ export default function App() {
 
 
 
-  async function saveAll(role,ans){
-    // Save to Supabase
-    await saveToSupabase(role, ans);
-    // Update local state for this session
-    const d={...allResponses};
-    d[role]=[...d[role],ans];
-    setAllResponses(d);
-  }
+ async function saveAll(role, ans){
+  const result = await saveToSupabase(role, ans);
+  setSaveStatus(result);
+  const d = {...allResponses};
+  d[role] = [...d[role], ans];
+  setAllResponses(d);
+}
+
 
   function begin(r){
     setRole(r);setStageId("search");setQStep(0);setAnswers({});
@@ -562,26 +562,50 @@ export default function App() {
   );
 
   // ── DONE ───────────────────────────────────────────────────────────────────
-  if(screen==="done") return(
-    <div style={{minHeight:"100vh",background:"#FAFAFA",display:"flex",alignItems:"center",justifyContent:"center",padding:20,fontFamily:"system-ui,sans-serif"}}>
-      <div style={{maxWidth:440,width:"100%",textAlign:"center"}}>
-        <div style={{fontSize:60,marginBottom:16}}>{role==="bewerber"?"🎊":"🏆"}</div>
-        <h2 style={{fontSize:24,fontWeight:800,color:"#111827",marginBottom:12}}>
-          {role==="bewerber"?"Du hast deinen Job!":"Recruiting abgeschlossen!"}
-        </h2>
-        <p style={{color:"#6B7280",fontSize:14,lineHeight:1.7,marginBottom:28}}>
-          {role==="bewerber"
-            ?"Herzlichen Glückwunsch! Du hast den kompletten Bewerbungsprozess durchlaufen. Deine Antworten helfen dabei, die Recruiting-Lücke sichtbar zu machen."
-            :"Ihr habt eine neue Mitarbeiterin gewonnen! Eure Antworten helfen dabei, die Recruiting-Lücke aus Unternehmenssicht zu verstehen."}
-        </p>
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          <button onClick={()=>setScreen("start")} style={{padding:"15px",borderRadius:14,border:"none",background:P,color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer"}}>
-            Zur Startseite
-          </button>
+if(screen==="done") return(
+  <div style={{minHeight:"100vh",background:"#FAFAFA",display:"flex",alignItems:"center",justifyContent:"center",padding:20,fontFamily:"system-ui,sans-serif"}}>
+    <div style={{maxWidth:440,width:"100%",textAlign:"center"}}>
+      <div style={{fontSize:60,marginBottom:16}}>{role==="bewerber"?"🎊":"🏆"}</div>
+      <h2 style={{fontSize:24,fontWeight:800,color:"#111827",marginBottom:12}}>
+        {role==="bewerber"?"Du hast deinen Job!":"Recruiting abgeschlossen!"}
+      </h2>
+      <p style={{color:"#6B7280",fontSize:14,lineHeight:1.7,marginBottom:20}}>
+        {role==="bewerber"
+          ?"Herzlichen Glückwunsch! Du hast den kompletten Bewerbungsprozess durchlaufen. Deine Antworten helfen dabei, die Recruiting-Lücke sichtbar zu machen."
+          :"Ihr habt eine neue Mitarbeiterin gewonnen! Eure Antworten helfen dabei, die Recruiting-Lücke aus Unternehmenssicht zu verstehen."}
+      </p>
+
+      {saveStatus===null && (
+        <div style={{background:"#F3F4F6",borderRadius:12,padding:"12px 16px",marginBottom:20,fontSize:13,color:"#6B7280"}}>
+          ⏳ Speichere Antworten...
         </div>
+      )}
+      {saveStatus?.ok && (
+        <div style={{background:"#ECFDF5",borderRadius:12,padding:"12px 16px",marginBottom:20,fontSize:13,color:"#065F46",fontWeight:600}}>
+          ✅ Antworten erfolgreich gespeichert
+        </div>
+      )}
+      {saveStatus && !saveStatus.ok && (
+        <div style={{background:"#FEF2F2",border:"1px solid #FECACA",borderRadius:12,padding:"14px 16px",marginBottom:20,textAlign:"left"}}>
+          <div style={{fontSize:13,fontWeight:700,color:"#B91C1C",marginBottom:8}}>❌ Speichern fehlgeschlagen</div>
+          <div style={{fontSize:12,color:"#7F1D1D",lineHeight:1.6,fontFamily:"monospace",wordBreak:"break-word"}}>
+            {saveStatus.error?.message && <div><strong>message:</strong> {saveStatus.error.message}</div>}
+            {saveStatus.error?.code && <div><strong>code:</strong> {saveStatus.error.code}</div>}
+            {saveStatus.error?.details && <div><strong>details:</strong> {saveStatus.error.details}</div>}
+            {saveStatus.error?.hint && <div><strong>hint:</strong> {saveStatus.error.hint}</div>}
+          </div>
+        </div>
+      )}
+
+      <div style={{display:"flex",flexDirection:"column",gap:12}}>
+        <button onClick={()=>setScreen("start")} style={{padding:"15px",borderRadius:14,border:"none",background:P,color:"#fff",fontSize:15,fontWeight:700,cursor:"pointer"}}>
+          Zur Startseite
+        </button>
       </div>
     </div>
-  );
+  </div>
+);
+
 
   // ── RESULTS ────────────────────────────────────────────────────────────────
   if(screen==="results"){
